@@ -162,6 +162,40 @@ function deleteFile(fileId) {
   DriveApp.getFileById(fileId).setTrashed(true);
 }
 
+function linkDriveItem(controlId, url) {
+  var id = extractDriveId_(url);
+  if (!id) throw new Error('Could not parse a Drive file or folder ID from that URL.');
+  var folder = filesFolder_(controlId);
+  // Try as file first, then as folder
+  try {
+    var file = DriveApp.getFileById(id);
+    var shortcut = file.createShortcut(folder.getId());
+    var sc = DriveApp.getFileById(shortcut.getId ? shortcut.getId() : shortcut);
+    return { id: sc.getId(), name: sc.getName(), mimeType: sc.getMimeType(),
+             size: 0, url: file.getUrl() };
+  } catch (e1) {
+    try {
+      var target = DriveApp.getFolderById(id);
+      // Create a shortcut via Advanced Drive if available, otherwise add a .url bookmark
+      var name = target.getName() + '.link.txt';
+      var link = 'https://drive.google.com/drive/folders/' + id;
+      var bookmark = folder.createFile(name, link, MimeType.PLAIN_TEXT);
+      return { id: bookmark.getId(), name: target.getName() + ' (folder link)',
+               mimeType: 'text/plain', size: bookmark.getSize(), url: link };
+    } catch (e2) {
+      throw new Error('Cannot access that file or folder. Check the URL and sharing permissions.');
+    }
+  }
+}
+
+function extractDriveId_(url) {
+  // Handles /d/ID, /folders/ID, ?id=ID, and open?id=ID patterns
+  var m = url.match(/\/d\/([a-zA-Z0-9_-]+)/) ||
+          url.match(/\/folders\/([a-zA-Z0-9_-]+)/) ||
+          url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  return m ? m[1] : null;
+}
+
 function getDrawioXml(fileId) {
   return DriveApp.getFileById(fileId).getBlob().getDataAsString();
 }

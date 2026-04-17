@@ -53,6 +53,7 @@
     $('file-upload').addEventListener('change', onFileUpload);
     $('btn-new-doc').addEventListener('click', createNewDoc);
     $('btn-new-sheet').addEventListener('click', createNewSheet);
+    $('btn-link-drive').addEventListener('click', linkDriveItem);
 
     // Mouse-wheel zoom on the layer navigator area
     $('layer-navigator').addEventListener('wheel', function (e) {
@@ -84,6 +85,8 @@
 
   function fileIcon(mime, name) {
     if (name && name.endsWith('.drawio')) return '\uD83D\uDCD0';
+    if (name && name.endsWith('.link.txt')) return '\uD83D\uDCC2';
+    if (mime === 'application/vnd.google-apps.shortcut') return '\uD83D\uDD17';
     if (mime === 'application/pdf') return '\uD83D\uDCC4';
     if (mime === 'application/vnd.google-apps.document')    return '\uD83D\uDCDD';
     if (mime === 'application/vnd.google-apps.spreadsheet') return '\uD83D\uDCCA';
@@ -507,6 +510,8 @@
       var btn  = '';
       if (f.name && f.name.endsWith('.drawio')) {
         btn = '<button class="att-view" data-id="' + f.id + '" data-action="drawio">View in App</button>';
+      } else if (f.name && f.name.endsWith('.link.txt')) {
+        btn = '<button class="att-view" data-id="' + f.id + '" data-action="link" data-url="' + esc(f.url) + '">Open Folder</button>';
       } else if (f.mimeType === 'application/pdf') {
         btn = '<button class="att-view" data-id="' + f.id + '" data-action="pdf">View PDF</button>';
       } else if (f.mimeType === 'application/vnd.google-apps.document') {
@@ -530,6 +535,7 @@
         var fid    = this.getAttribute('data-id');
         var action = this.getAttribute('data-action');
         if (action === 'drawio') { viewDrawio(fid); }
+        else if (action === 'link') { window.open(this.getAttribute('data-url'), '_blank'); }
         else { viewInDrive(fid, action); }
       });
     });
@@ -594,6 +600,19 @@
       })
       .withFailureHandler(function (e) { showError('Failed: ' + e.message); })
       .createGoogleSheet(state.currentControl.id, title);
+  }
+
+  function linkDriveItem() {
+    if (!state.currentControl) return;
+    var url = prompt('Paste Google Drive link (file or folder URL):');
+    if (!url) return;
+    showStatus('Linking\u2026');
+    google.script.run
+      .withSuccessHandler(function () {
+        showStatus('Linked.'); loadControlFiles();
+      })
+      .withFailureHandler(function (e) { showError('Link failed: ' + e.message); })
+      .linkDriveItem(state.currentControl.id, url);
   }
 
   // ==================================================================
