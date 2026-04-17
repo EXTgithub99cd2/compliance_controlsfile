@@ -1,0 +1,659 @@
+<script>
+(function () {
+  'use strict';
+
+  // ==================================================================
+  //  State
+  // ==================================================================
+  var state = {
+    standards:        [],
+    controls:         [],
+    currentStandardId: null,
+    currentControl:    null,
+    currentLayerIndex: 0,
+    controlFiles:      []
+  };
+
+  var LAYERS = [
+    { id: 'inspection',   label: 'Inspection / Audit', icon: '\uD83D\uDD0D' },
+    { id: 'policy',       label: 'Policy',             icon: '\uD83D\uDCCB' },
+    { id: 'procedures',   label: 'Procedures',         icon: '\u2699\uFE0F' },
+    { id: 'instructions', label: 'Work Instructions',  icon: '\uD83D\uDCDD' },
+    { id: 'evidence',     label: 'Evidence & Records',  icon: '\uD83D\uDCC1' }
+  ];
+
+  var drawioViewerLoaded = false;
+  var drawioXmlCache     = {};
+
+  // ==================================================================
+  //  Bootstrap
+  // ==================================================================
+  document.addEventListener('DOMContentLoaded', function () {
+    bindEvents();
+    bootstrapApp();
+  });
+
+  function bindEvents() {
+    $('standard-select').addEventListener('change', onStandardChange);
+    $('btn-zoom-in').addEventListener('click', function () { changeLayer(1); });
+    $('btn-zoom-out').addEventListener('click', function () { changeLayer(-1); });
+    $('btn-save-control').addEventListener('click', saveCurrentControl);
+    $('btn-delete-control').addEventListener('click', deleteCurrentControl);
+    $('btn-add-control').addEventListener('click', addNewControl);
+    $('btn-add-standard').addEventListener('click', addNewStandard);
+    $('btn-add-mapping').addEventListener('click', addMapping);
+    $('btn-init-sample').addEventListener('click', initSampleData);
+    $('file-upload').addEventListener('change', onFileUpload);
+    $('btn-new-doc').addEventListener('click', createNewDoc);
+    $('btn-new-sheet').addEventListener('click', createNewSheet);
+
+    // Mouse-wheel zoom on the layer navigator area
+    $('layer-navigator').addEventListener('wheel', function (e) {
+      e.preventDefault();
+      changeLayer(e.deltaY > 0 ? 1 : -1);
+    }, { passive: false });
+
+    // Keyboard +/- when not editing text
+    document.addEventListener('keydown', function (e) {
+      var tag = e.target.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || e.target.isContentEditable) return;
+      if (e.key === '+' || e.key === '=') { e.preventDefault(); changeLayer(1); }
+      if (e.key === '-')                  { e.preventDefault(); changeLayer(-1); }
+    });
+  }
+
+  // ==================================================================
+  //  Utility
+  // ==================================================================
+  function $(id) { return document.getElementById(id); }
+
+  function esc(s) {
+    if (!s) return '';
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function showStatus(msg) { $('status-text').textContent = msg; $('status-bar').className = ''; }
+  function showError(msg)  { $('status-text').textContent = msg; $('status-bar').className = 'error'; }
+
+  function fileIcon(mime, name) {
+    if (name && name.endsWith('.drawio')) return '\uD83D\uDCD0';
+    if (mime === 'application/pdf') return '\uD83D\uDCC4';
+    if (mime === 'application/vnd.google-apps.document')    return '\uD83D\uDCDD';
+    if (mime === 'application/vnd.google-apps.spreadsheet') return '\uD83D\uDCCA';
+    if (mime && mime.startsWith('image/')) return '\uD83D\uDDBC\uFE0F';
+    return '\uD83D\uDCCE';
+  }
+
+  // ==================================================================
+  //  Standards
+  // ==================================================================
+  function bootstrapApp() {
+    showStatus('Loading\u2026');
+    // Pre-load draw.io viewer now (no .mxgraph divs exist yet,
+    // so the viewer's auto-scan finds nothing and won't error)
+    preloadDrawioViewer();
+    google.script.run
+      .withSuccessHandler(function (data) {
+        state.standards = data.standards || [];
+        state.controls  = data.controls  || [];
+        renderStandardSelect();
+        // Show version in footer
+        if (data.version) {
+          $('app-version').textContent = 'v' + data.version;
+        }
+        if (data.firstStandardId) {
+          state.currentStandardId = data.firstStandardId;
+          $('standard-select').value = data.firstStandardId;
+          renderControlsList();
+          showStatus(state.controls.length + ' controls loaded.');
+        } else {
+          showStatus('No standards yet \u2014 click "Load Sample Data".');
+        }
+      })
+      .withFailureHandler(function (e) { showError('Load failed: ' + e.message); })
+      .getBootstrapData();
+  }
+
+  function loadStandards() {
+    showStatus('Loading standards\u2026');
+    google.script.run
+      .withSuccessHandler(function (list) {
+        state.standards = list || [];
+        renderStandardSelect();
+        if (state.standards.length) {
+          state.currentStandardId = state.standards[0].id;
+          $('standard-select').value = state.currentStandardId;
+          loadControls(state.currentStandardId);
+        } else {
+          showStatus('No standards yet \u2014 click "Load Sample Data".');
+        }
+      })
+      .withFailureHandler(function (e) { showError('Load standards failed: ' + e.message); })
+      .getStandards();
+  }
+
+  function renderStandardSelect() {
+    var sel = $('standard-select');
+    sel.innerHTML = '';
+    if (!state.standards.length) {
+      sel.innerHTML = '<option value="">No standards</option>';
+      return;
+    }
+    state.standards.forEach(function (s) {
+      var o = document.createElement('option');
+      o.value = s.id; o.textContent = s.name;
+      sel.appendChild(o);
+    });
+  }
+
+  function addNewStandard() {
+    var name = prompt('Standard name (e.g. ISO 9001:2015):');
+    if (!name) return;
+    var id = name.toLowerCase().replace(/[^a-z0-9]+/g, '').replace(/\s+/g, '');
+    if (!id) { showError('Invalid name.'); return; }
+    var std = { id: id, name: name, description: '', clauses: [] };
+    showStatus('Creating standard\u2026');
+    google.script.run
+      .withSuccessHandler(function () {
+        loadStandards();
+        // Auto-select after reload
+        setTimeout(function () {
+          $('standard-select').value = id;
+          state.currentStandardId = id;
+          onStandardChange();
+        }, 500);
+        showStatus('Standard created.');
+      })
+      .withFailureHandler(function (e) { showError('Create failed: ' + e.message); })
+      .saveStandard(std);
+  }
+
+  function onStandardChange() {
+    state.currentStandardId = $('standard-select').value;
+    state.currentControl = null;
+    $('control-view').style.display = 'none';
+    $('no-selection').style.display = 'flex';
+    loadControls(state.currentStandardId);
+  }
+
+  // ==================================================================
+  //  Controls list
+  // ==================================================================
+  function loadControls(stdId) {
+    showStatus('Loading controls\u2026');
+    google.script.run
+      .withSuccessHandler(function (list) {
+        state.controls = list || [];
+        renderControlsList();
+        showStatus(state.controls.length + ' controls loaded.');
+      })
+      .withFailureHandler(function (e) { showError('Load controls failed: ' + e.message); })
+      .getControls(stdId);
+  }
+
+  function renderControlsList() {
+    var el = $('controls-list');
+    el.innerHTML = '';
+    state.controls.forEach(function (c) {
+      var div = document.createElement('div');
+      div.className = 'control-item' +
+        (state.currentControl && state.currentControl.id === c.id ? ' active' : '');
+      div.innerHTML = '<div class="clause-ref">' + esc(c.clauseRef) + '</div>' +
+                      '<div class="clause-title">' + esc(c.title) + '</div>';
+      div.addEventListener('click', function () { selectControl(c.id); });
+      el.appendChild(div);
+    });
+  }
+
+  function selectControl(controlId) {
+    showStatus('Loading control\u2026');
+    google.script.run
+      .withSuccessHandler(function (data) {
+        if (!data) { showError('Control not found.'); return; }
+        state.currentControl = data.control;
+        state.controlFiles   = data.files || [];
+        state.currentLayerIndex = 0;
+        // Cache drawio XML if present
+        if (data.drawio) {
+          drawioXmlCache[data.drawio.fileId] = data.drawio.xml;
+        }
+        renderControl();
+        renderControlsList();
+        $('no-selection').style.display = 'none';
+        $('control-view').style.display = 'flex';
+        showStatus('');
+      })
+      .withFailureHandler(function (e) { showError('Load control failed: ' + e.message); })
+      .getControlWithFiles(controlId);
+  }
+
+  // ==================================================================
+  //  Render a single control
+  // ==================================================================
+  function renderControl() {
+    var c = state.currentControl;
+    if (!c) return;
+    $('control-clause').textContent = c.clauseRef;
+    $('control-title').value = c.title;
+    $('control-classification').value = c.classification || 'Internal';
+    $('control-version-input').value  = c.version || '1.0';
+    $('source-text').value      = c.sourceText   || '';
+    $('description-text').value = c.description  || '';
+    renderMappings();
+    renderLayerDots();
+    renderLayerContent();
+  }
+
+  // ==================================================================
+  //  Layer navigation
+  // ==================================================================
+  function changeLayer(delta) {
+    var idx = state.currentLayerIndex + delta;
+    if (idx < 0 || idx >= LAYERS.length) return;
+    saveLayerContent();
+    state.currentLayerIndex = idx;
+    renderLayerDots();
+    renderLayerContent();
+  }
+
+  function renderLayerDots() {
+    var el = $('layer-dots');
+    el.innerHTML = '';
+    LAYERS.forEach(function (l, i) {
+      var d = document.createElement('div');
+      d.className = 'layer-dot' + (i === state.currentLayerIndex ? ' active' : '');
+      d.title = l.label;
+      d.addEventListener('click', function () {
+        saveLayerContent();
+        state.currentLayerIndex = i;
+        renderLayerDots();
+        renderLayerContent();
+      });
+      el.appendChild(d);
+    });
+    var cur = LAYERS[state.currentLayerIndex];
+    $('layer-label').textContent = cur.icon + ' ' + cur.label;
+  }
+
+  function renderLayerContent() {
+    var c = state.currentControl;
+    if (!c || !c.layers) return;
+    var layer = c.layers[state.currentLayerIndex];
+    if (!layer) return;
+    $('layer-text-title').textContent = LAYERS[state.currentLayerIndex].label + ' Content';
+    $('layer-text-editor').innerHTML = layer.content ||
+      '<p style="color:#999"><em>Click here to add content\u2026</em></p>';
+    renderAttachments();
+    renderDrawioIfAvailable();
+  }
+
+  function saveLayerContent() {
+    var c = state.currentControl;
+    if (!c || !c.layers) return;
+    var layer = c.layers[state.currentLayerIndex];
+    if (layer) layer.content = $('layer-text-editor').innerHTML;
+  }
+
+  // ==================================================================
+  //  Mappings
+  // ==================================================================
+  function renderMappings() {
+    var el = $('mappings-list');
+    el.innerHTML = '';
+    var m = (state.currentControl && state.currentControl.mappings) || [];
+    m.forEach(function (ref, i) {
+      var tag = document.createElement('span');
+      tag.className = 'mapping-tag';
+      tag.innerHTML = esc(ref) + ' <button title="Remove">&times;</button>';
+      tag.querySelector('button').addEventListener('click', function () {
+        state.currentControl.mappings.splice(i, 1);
+        renderMappings();
+      });
+      el.appendChild(tag);
+    });
+  }
+
+  function addMapping() {
+    var inp = $('mapping-input');
+    var val = inp.value.trim();
+    if (!val || !state.currentControl) return;
+    if (!state.currentControl.mappings) state.currentControl.mappings = [];
+    state.currentControl.mappings.push(val);
+    inp.value = '';
+    renderMappings();
+  }
+
+  // ==================================================================
+  //  Control CRUD
+  // ==================================================================
+  function saveCurrentControl() {
+    var c = state.currentControl;
+    if (!c) return;
+    saveLayerContent();
+    c.title          = $('control-title').value;
+    c.classification = $('control-classification').value;
+    c.version        = $('control-version-input').value;
+    c.sourceText     = $('source-text').value;
+    c.description    = $('description-text').value;
+
+    showStatus('Saving\u2026');
+    google.script.run
+      .withSuccessHandler(function () {
+        showStatus('Saved.');
+        loadControls(state.currentStandardId);
+      })
+      .withFailureHandler(function (e) { showError('Save failed: ' + e.message); })
+      .saveControl(c);
+  }
+
+  function deleteCurrentControl() {
+    if (!state.currentControl) return;
+    if (!confirm('Delete control ' + state.currentControl.clauseRef + '?')) return;
+    showStatus('Deleting\u2026');
+    google.script.run
+      .withSuccessHandler(function () {
+        state.currentControl = null;
+        $('control-view').style.display = 'none';
+        $('no-selection').style.display = 'flex';
+        loadControls(state.currentStandardId);
+        showStatus('Deleted.');
+      })
+      .withFailureHandler(function (e) { showError('Delete failed: ' + e.message); })
+      .deleteControl(state.currentControl.id);
+  }
+
+  function addNewControl() {
+    if (!state.currentStandardId) { showError('Select a standard first.'); return; }
+    var ref = prompt('Clause reference (e.g. A.9.1):');
+    if (!ref) return;
+    var id  = state.currentStandardId + '-' + ref;
+    var ctrl = {
+      id: id, standardId: state.currentStandardId, clauseRef: ref,
+      title: 'New Control', sourceText: '', description: '',
+      classification: 'Internal', version: '1.0',
+      customFields: {}, mappings: [],
+      layers: LAYERS.map(function (l, i) {
+        return { id: l.id, label: l.label, order: i, content: '' };
+      })
+    };
+    showStatus('Creating\u2026');
+    google.script.run
+      .withSuccessHandler(function () {
+        loadControls(state.currentStandardId);
+        selectControl(id);
+        showStatus('Created.');
+      })
+      .withFailureHandler(function (e) { showError('Create failed: ' + e.message); })
+      .saveControl(ctrl);
+  }
+
+  // ==================================================================
+  //  File upload
+  // ==================================================================
+  function onFileUpload(e) {
+    var file = e.target.files[0];
+    if (!file || !state.currentControl) return;
+    showStatus('Uploading ' + file.name + '\u2026');
+    var reader = new FileReader();
+    reader.onload = function (evt) {
+      var b64 = evt.target.result.split(',')[1];
+      google.script.run
+        .withSuccessHandler(function () {
+          showStatus(file.name + ' uploaded.');
+          loadControlFiles();
+        })
+        .withFailureHandler(function (err) { showError('Upload failed: ' + err.message); })
+        .uploadFile(state.currentControl.id, b64, file.name,
+                    file.type || 'application/octet-stream');
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  }
+
+  // ==================================================================
+  //  Attachments list
+  // ==================================================================
+  function loadControlFiles() {
+    if (!state.currentControl) return;
+    google.script.run
+      .withSuccessHandler(function (files) {
+        state.controlFiles = files || [];
+        renderAttachments();
+        renderDrawioIfAvailable();
+      })
+      .withFailureHandler(function (e) { showError('Load files failed: ' + e.message); })
+      .getControlFiles(state.currentControl.id);
+  }
+
+  function renderAttachments() {
+    var el = $('attachments-list');
+    el.innerHTML = '';
+    if (!state.controlFiles.length) {
+      el.innerHTML = '<p style="color:var(--text-light);font-size:12px;">No files attached yet.</p>';
+      return;
+    }
+    state.controlFiles.forEach(function (f) {
+      var div = document.createElement('div');
+      div.className = 'attachment-item';
+      var icon = fileIcon(f.mimeType, f.name);
+      var btn  = '';
+      if (f.name && f.name.endsWith('.drawio')) {
+        btn = '<button class="att-view" data-id="' + f.id + '" data-action="drawio">View in App</button>';
+      } else if (f.mimeType === 'application/pdf') {
+        btn = '<button class="att-view" data-id="' + f.id + '" data-action="pdf">View PDF</button>';
+      } else if (f.mimeType === 'application/vnd.google-apps.document') {
+        btn = '<button class="att-view" data-id="' + f.id + '" data-action="doc">Open Doc</button>';
+      } else if (f.mimeType === 'application/vnd.google-apps.spreadsheet') {
+        btn = '<button class="att-view" data-id="' + f.id + '" data-action="sheet">Open Sheet</button>';
+      } else {
+        btn = '<button class="att-view" data-id="' + f.id + '" data-action="file">Open</button>';
+      }
+      div.innerHTML =
+        '<span class="att-icon">' + icon + '</span>' +
+        '<span class="att-name">' + esc(f.name) + '</span>' +
+        btn +
+        '<button class="att-delete" data-id="' + f.id + '">Delete</button>';
+      el.appendChild(div);
+    });
+
+    // Attach event listeners (avoids inline onclick)
+    el.querySelectorAll('.att-view').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var fid    = this.getAttribute('data-id');
+        var action = this.getAttribute('data-action');
+        if (action === 'drawio') { viewDrawio(fid); }
+        else { viewInDrive(fid, action); }
+      });
+    });
+    el.querySelectorAll('.att-delete').forEach(function (b) {
+      b.addEventListener('click', function () {
+        deleteAttachment(this.getAttribute('data-id'));
+      });
+    });
+  }
+
+  // ==================================================================
+  //  View files
+  // ==================================================================
+  function viewInDrive(fileId, type) {
+    var url;
+    switch (type) {
+      case 'pdf':   url = 'https://drive.google.com/file/d/' + fileId + '/preview'; break;
+      case 'doc':   url = 'https://docs.google.com/document/d/' + fileId + '/edit';  break;
+      case 'sheet': url = 'https://docs.google.com/spreadsheets/d/' + fileId + '/edit'; break;
+      default:      url = 'https://drive.google.com/file/d/' + fileId + '/view';
+    }
+    window.open(url, '_blank');
+  }
+
+  function deleteAttachment(fileId) {
+    if (!confirm('Delete this file?')) return;
+    showStatus('Deleting\u2026');
+    google.script.run
+      .withSuccessHandler(function () { showStatus('Deleted.'); loadControlFiles(); })
+      .withFailureHandler(function (e) { showError('Delete failed: ' + e.message); })
+      .deleteFile(fileId);
+  }
+
+  // ==================================================================
+  //  Google Docs / Sheets creation
+  // ==================================================================
+  function createNewDoc() {
+    if (!state.currentControl) return;
+    var title = prompt('Document title:',
+      state.currentControl.title + ' \u2014 ' + LAYERS[state.currentLayerIndex].label);
+    if (!title) return;
+    showStatus('Creating Google Doc\u2026');
+    google.script.run
+      .withSuccessHandler(function (r) {
+        showStatus('Doc created.'); loadControlFiles();
+        window.open(r.url, '_blank');
+      })
+      .withFailureHandler(function (e) { showError('Failed: ' + e.message); })
+      .createGoogleDoc(state.currentControl.id, title);
+  }
+
+  function createNewSheet() {
+    if (!state.currentControl) return;
+    var title = prompt('Spreadsheet title:',
+      state.currentControl.title + ' \u2014 Data');
+    if (!title) return;
+    showStatus('Creating Google Sheet\u2026');
+    google.script.run
+      .withSuccessHandler(function (r) {
+        showStatus('Sheet created.'); loadControlFiles();
+        window.open(r.url, '_blank');
+      })
+      .withFailureHandler(function (e) { showError('Failed: ' + e.message); })
+      .createGoogleSheet(state.currentControl.id, title);
+  }
+
+  // ==================================================================
+  //  draw.io rendering
+  // ==================================================================
+  function renderDrawioIfAvailable() {
+    var drawioFile = null;
+    (state.controlFiles || []).forEach(function (f) {
+      if (f.name && f.name.endsWith('.drawio')) drawioFile = f;
+    });
+    var sec = $('drawio-section');
+    if (!sec) return;
+    if (!drawioFile) { sec.style.display = 'none'; return; }
+    sec.style.display = 'block';
+    $('drawio-page-label').textContent =
+      'Page ' + (state.currentLayerIndex + 1) + ' of ' + LAYERS.length;
+
+    if (drawioXmlCache[drawioFile.id]) {
+      renderDiagram(drawioXmlCache[drawioFile.id], state.currentLayerIndex);
+      return;
+    }
+    showStatus('Loading diagram\u2026');
+    google.script.run
+      .withSuccessHandler(function (xml) {
+        drawioXmlCache[drawioFile.id] = xml;
+        renderDiagram(xml, state.currentLayerIndex);
+        showStatus('');
+      })
+      .withFailureHandler(function (e) { showError('Diagram load failed: ' + e.message); })
+      .getDrawioXml(drawioFile.id);
+  }
+
+  function viewDrawio(fileId) {
+    $('drawio-section').style.display = 'block';
+    if (drawioXmlCache[fileId]) {
+      renderDiagram(drawioXmlCache[fileId], state.currentLayerIndex);
+      return;
+    }
+    showStatus('Loading diagram\u2026');
+    google.script.run
+      .withSuccessHandler(function (xml) {
+        drawioXmlCache[fileId] = xml;
+        renderDiagram(xml, state.currentLayerIndex);
+        showStatus('');
+      })
+      .withFailureHandler(function (e) { showError('Diagram load failed: ' + e.message); })
+      .getDrawioXml(fileId);
+  }
+
+  function renderDiagram(xml, pageIndex) {
+    var container = $('drawio-container');
+    if (!container) return;
+    container.innerHTML = '';
+
+    // Count available pages in the XML
+    var pageCount = (xml.match(/<diagram[\s>]/g) || []).length;
+    var safePage  = Math.min(pageIndex, pageCount - 1);
+    if (safePage < 0) safePage = 0;
+
+    // Wait for viewer, then render only inside our container
+    waitForDrawioViewer(function () {
+      container.innerHTML = '';
+      var div = document.createElement('div');
+      div.className = 'mxgraph';
+      div.style.maxWidth = '100%';
+      div.setAttribute('data-mxgraph', JSON.stringify({
+        highlight: '#0000ff',
+        nav: true,
+        resize: true,
+        page: safePage,
+        toolbar: 'zoom layers lightbox',
+        xml: xml
+      }));
+      container.appendChild(div);
+
+      try {
+        if (_origProcessElements) {
+          _origProcessElements.call(GraphViewer, container);
+        }
+      } catch (ex) {
+        console.warn('draw.io viewer:', ex.message || ex);
+      }
+    });
+  }
+
+  var _origProcessElements = null;
+  var drawioCallbacks = [];
+
+  /** Pre-load the viewer script early (call when no .mxgraph divs exist) */
+  function preloadDrawioViewer() {
+    if (drawioViewerLoaded) return;
+    // Stub MathJax to prevent initialization errors
+    window.MathJax = { isReady: true, Hub: { Queue: function(){}, Config: function(){} } };
+    window.DRAW_MATH_URL = '';
+    var s = document.createElement('script');
+    s.src = 'https://viewer.diagrams.net/js/viewer-static.min.js';
+    s.onload = function () {
+      drawioViewerLoaded = true;
+      // Save original processElements, then disable auto-scan
+      if (typeof GraphViewer !== 'undefined') {
+        _origProcessElements = GraphViewer.processElements;
+        GraphViewer.processElements = function () {};
+      }
+      drawioCallbacks.forEach(function (fn) { fn(); });
+      drawioCallbacks = [];
+    };
+    s.onerror = function () { showError('Could not load draw.io viewer.'); };
+    document.head.appendChild(s);
+  }
+
+  /** Wait for the viewer to be ready, then call cb */
+  function waitForDrawioViewer(cb) {
+    if (drawioViewerLoaded) { cb(); return; }
+    drawioCallbacks.push(cb);
+    preloadDrawioViewer();
+  }
+
+  // ==================================================================
+  //  Sample data
+  // ==================================================================
+  function initSampleData() {
+    if (!confirm('Create sample standards, controls and a draw.io diagram in your Drive?')) return;
+    showStatus('Creating sample data\u2026 (this may take a moment)');
+    google.script.run
+      .withSuccessHandler(function (r) { showStatus(r.message); loadStandards(); })
+      .withFailureHandler(function (e) { showError('Sample data failed: ' + e.message); })
+      .initSampleData();
+  }
+
+})();
+</script>

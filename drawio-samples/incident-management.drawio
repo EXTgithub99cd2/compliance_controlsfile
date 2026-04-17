@@ -1,0 +1,88 @@
+<mxfile host="ComplianceApp">
+  <diagram id="page-0" name="1 — Strategic Overview">
+    <mxGraphModel dx="1222" dy="500" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="p1-t" value="Incident Management — Strategic Overview" style="text;html=1;fontSize=18;fontStyle=1;align=center;verticalAlign=middle;" vertex="1" parent="1"><mxGeometry x="200" y="20" width="600" height="40" as="geometry"/></mxCell>
+        <mxCell id="p1-s0" value="&lt;b&gt;Detect&lt;/b&gt;&lt;br&gt;Identify incident" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;" vertex="1" parent="1"><mxGeometry x="40" y="120" width="160" height="80" as="geometry"/></mxCell>
+        <mxCell id="p1-s1" value="&lt;b&gt;Classify&lt;/b&gt;&lt;br&gt;Assess severity" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;" vertex="1" parent="1"><mxGeometry x="260" y="120" width="160" height="80" as="geometry"/></mxCell>
+        <mxCell id="p1-s2" value="&lt;b&gt;Respond&lt;/b&gt;&lt;br&gt;Contain &amp;amp; mitigate" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;" vertex="1" parent="1"><mxGeometry x="480" y="120" width="160" height="80" as="geometry"/></mxCell>
+        <mxCell id="p1-s3" value="&lt;b&gt;Recover&lt;/b&gt;&lt;br&gt;Restore services" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;" vertex="1" parent="1"><mxGeometry x="700" y="120" width="160" height="80" as="geometry"/></mxCell>
+        <mxCell id="p1-s4" value="&lt;b&gt;Review&lt;/b&gt;&lt;br&gt;Lessons learned" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;" vertex="1" parent="1"><mxGeometry x="920" y="120" width="160" height="80" as="geometry"/></mxCell>
+        <mxCell id="p1-e0" style="endArrow=block;endFill=1;" edge="1" source="p1-s0" target="p1-s1" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="p1-e1" style="endArrow=block;endFill=1;" edge="1" source="p1-s1" target="p1-s2" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="p1-e2" style="endArrow=block;endFill=1;" edge="1" source="p1-s2" target="p1-s3" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="p1-e3" style="endArrow=block;endFill=1;" edge="1" source="p1-s3" target="p1-s4" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="page-1" name="2 — Operational Procedures">
+    <mxGraphModel dx="1222" dy="680" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="p2-t" value="Incident Management — Operational Procedures" style="text;html=1;fontSize=16;fontStyle=1;align=center;verticalAlign=middle;" vertex="1" parent="1"><mxGeometry x="150" y="10" width="700" height="36" as="geometry"/></mxCell>
+        <mxCell id="p2-band1" value="&lt;b&gt;IT Operations&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontSize=13;fontStyle=1;verticalAlign=top;align=left;spacingLeft=8;" vertex="1" parent="1"><mxGeometry x="10" y="55" width="980" height="120" as="geometry"/></mxCell>
+        <mxCell id="p2-band2" value="&lt;b&gt;Security Team&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff8e1;strokeColor=#cccccc;fontSize=13;fontStyle=1;verticalAlign=top;align=left;spacingLeft=8;" vertex="1" parent="1"><mxGeometry x="10" y="185" width="980" height="120" as="geometry"/></mxCell>
+        <mxCell id="p2-band3" value="&lt;b&gt;Management&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e8f5e9;strokeColor=#cccccc;fontSize=13;fontStyle=1;verticalAlign=top;align=left;spacingLeft=8;" vertex="1" parent="1"><mxGeometry x="10" y="315" width="980" height="120" as="geometry"/></mxCell>
+        <mxCell id="p2-it1" value="Monitor&lt;br&gt;Alerts" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" vertex="1" parent="1"><mxGeometry x="30" y="85" width="130" height="60" as="geometry"/></mxCell>
+        <mxCell id="p2-it2" value="Initial&lt;br&gt;Triage" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" vertex="1" parent="1"><mxGeometry x="210" y="85" width="130" height="60" as="geometry"/></mxCell>
+        <mxCell id="p2-it3" value="Execute&lt;br&gt;Remediation" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" vertex="1" parent="1"><mxGeometry x="640" y="85" width="130" height="60" as="geometry"/></mxCell>
+        <mxCell id="p2-it4" value="Verify&lt;br&gt;Resolution" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" vertex="1" parent="1"><mxGeometry x="830" y="85" width="130" height="60" as="geometry"/></mxCell>
+        <mxCell id="p2-sec1" value="Assess&lt;br&gt;Impact" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" vertex="1" parent="1"><mxGeometry x="210" y="215" width="130" height="60" as="geometry"/></mxCell>
+        <mxCell id="p2-sec2" value="Contain&lt;br&gt;Threat" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" vertex="1" parent="1"><mxGeometry x="400" y="215" width="130" height="60" as="geometry"/></mxCell>
+        <mxCell id="p2-sec3" value="Root Cause&lt;br&gt;Analysis" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" vertex="1" parent="1"><mxGeometry x="640" y="215" width="130" height="60" as="geometry"/></mxCell>
+        <mxCell id="p2-mgr1" value="Receive&lt;br&gt;Escalation" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" vertex="1" parent="1"><mxGeometry x="400" y="345" width="130" height="60" as="geometry"/></mxCell>
+        <mxCell id="p2-mgr2" value="Approve&lt;br&gt;Response Plan" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" vertex="1" parent="1"><mxGeometry x="640" y="345" width="130" height="60" as="geometry"/></mxCell>
+        <mxCell id="p2-mgr3" value="Sign-off&lt;br&gt;&amp;amp; Close" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" vertex="1" parent="1"><mxGeometry x="830" y="345" width="130" height="60" as="geometry"/></mxCell>
+        <mxCell id="p2-e1" style="endArrow=block;endFill=1;" edge="1" source="p2-it1" target="p2-it2" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="p2-e2" style="endArrow=block;endFill=1;" edge="1" source="p2-it2" target="p2-sec1" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="p2-e3" style="endArrow=block;endFill=1;" edge="1" source="p2-sec1" target="p2-sec2" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="p2-e4" style="endArrow=block;endFill=1;" edge="1" source="p2-sec2" target="p2-mgr1" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="p2-e5" style="endArrow=block;endFill=1;" edge="1" source="p2-mgr1" target="p2-mgr2" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="p2-e6" style="endArrow=block;endFill=1;" edge="1" source="p2-mgr2" target="p2-it3" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="p2-e7" style="endArrow=block;endFill=1;" edge="1" source="p2-it3" target="p2-sec3" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="p2-e8" style="endArrow=block;endFill=1;" edge="1" source="p2-sec3" target="p2-it4" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="p2-e9" style="endArrow=block;endFill=1;" edge="1" source="p2-it4" target="p2-mgr3" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="page-2" name="3 — Detailed Work Instructions">
+    <mxGraphModel dx="1222" dy="780" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="p3-t" value="Incident Management — Detailed Work Instructions" style="text;html=1;fontSize=16;fontStyle=1;align=center;verticalAlign=middle;" vertex="1" parent="1"><mxGeometry x="150" y="10" width="700" height="36" as="geometry"/></mxCell>
+        <mxCell id="p3-start" value="Alert&lt;br&gt;Notification" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;" vertex="1" parent="1"><mxGeometry x="40" y="80" width="140" height="60" as="geometry"/></mxCell>
+        <mxCell id="p3-s1" value="Open Grafana&lt;br&gt;Dashboard" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" vertex="1" parent="1"><mxGeometry x="240" y="80" width="140" height="60" as="geometry"/></mxCell>
+        <mxCell id="p3-d1" value="Severity&lt;br&gt;&amp;gt;= High?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" vertex="1" parent="1"><mxGeometry x="450" y="80" width="120" height="80" as="geometry"/></mxCell>
+        <mxCell id="p3-h1" value="Page On-Call&lt;br&gt;Engineer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" vertex="1" parent="1"><mxGeometry x="650" y="30" width="140" height="55" as="geometry"/></mxCell>
+        <mxCell id="p3-h2" value="Isolate Affected&lt;br&gt;System" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" vertex="1" parent="1"><mxGeometry x="850" y="30" width="140" height="55" as="geometry"/></mxCell>
+        <mxCell id="p3-h3" value="Notify CISO&lt;br&gt;within 30 min" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" vertex="1" parent="1"><mxGeometry x="650" y="110" width="140" height="55" as="geometry"/></mxCell>
+        <mxCell id="p3-h4" value="Assemble&lt;br&gt;Response Team" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" vertex="1" parent="1"><mxGeometry x="850" y="110" width="140" height="55" as="geometry"/></mxCell>
+        <mxCell id="p3-l1" value="Create Ticket&lt;br&gt;in JIRA" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1"><mxGeometry x="450" y="220" width="140" height="55" as="geometry"/></mxCell>
+        <mxCell id="p3-l2" value="Schedule Fix&lt;br&gt;in Next Sprint" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1"><mxGeometry x="650" y="220" width="140" height="55" as="geometry"/></mxCell>
+        <mxCell id="p3-l3" value="Implement &amp;amp;&lt;br&gt;Test Fix" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1"><mxGeometry x="850" y="220" width="140" height="55" as="geometry"/></mxCell>
+        <mxCell id="p3-d2" value="Resolution&lt;br&gt;Verified?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" vertex="1" parent="1"><mxGeometry x="650" y="340" width="120" height="80" as="geometry"/></mxCell>
+        <mxCell id="p3-end" value="Close Incident&lt;br&gt;&amp;amp; File Report" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;" vertex="1" parent="1"><mxGeometry x="850" y="350" width="140" height="60" as="geometry"/></mxCell>
+        <mxCell id="p3-re" value="Reopen &amp;amp;&lt;br&gt;Reassign" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" vertex="1" parent="1"><mxGeometry x="450" y="355" width="130" height="50" as="geometry"/></mxCell>
+        <mxCell id="p3-e0" style="endArrow=block;endFill=1;" edge="1" source="p3-start" target="p3-s1" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="p3-e1" style="endArrow=block;endFill=1;" edge="1" source="p3-s1" target="p3-d1" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="p3-e2" value="Yes" style="endArrow=block;endFill=1;fontSize=11;" edge="1" source="p3-d1" target="p3-h1" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="p3-e3" style="endArrow=block;endFill=1;" edge="1" source="p3-h1" target="p3-h2" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="p3-e3b" style="endArrow=block;endFill=1;" edge="1" source="p3-h1" target="p3-h3" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="p3-e3c" style="endArrow=block;endFill=1;" edge="1" source="p3-h3" target="p3-h4" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="p3-e3d" style="endArrow=block;endFill=1;" edge="1" source="p3-h2" target="p3-d2" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="p3-e3e" style="endArrow=block;endFill=1;" edge="1" source="p3-h4" target="p3-d2" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="p3-e4" value="No" style="endArrow=block;endFill=1;fontSize=11;" edge="1" source="p3-d1" target="p3-l1" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="p3-e5" style="endArrow=block;endFill=1;" edge="1" source="p3-l1" target="p3-l2" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="p3-e6" style="endArrow=block;endFill=1;" edge="1" source="p3-l2" target="p3-l3" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="p3-e7" style="endArrow=block;endFill=1;" edge="1" source="p3-l3" target="p3-d2" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="p3-e8" value="Yes" style="endArrow=block;endFill=1;fontSize=11;" edge="1" source="p3-d2" target="p3-end" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="p3-e9" value="No" style="endArrow=block;endFill=1;fontSize=11;" edge="1" source="p3-d2" target="p3-re" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="p3-e10" style="endArrow=block;endFill=1;" edge="1" source="p3-re" target="p3-s1" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

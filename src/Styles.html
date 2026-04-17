@@ -1,0 +1,253 @@
+<style>
+/* ============================================================
+   Compliance Controls — Stylesheet
+   ============================================================ */
+
+:root {
+  --bg:              #f0f2f5;
+  --sidebar-bg:      #1a1f36;
+  --sidebar-text:    #ccd0db;
+  --primary:         #4f6bed;
+  --primary-hover:   #3d5bd9;
+  --danger:          #e74c3c;
+  --surface:         #ffffff;
+  --text:            #2d3436;
+  --text-light:      #636e72;
+  --border:          #dfe6e9;
+  --layer-active:    #4f6bed;
+  --layer-inactive:  #b2bec3;
+  --radius:          6px;
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ---- App shell ---- */
+#app          { display: flex; flex-direction: column; height: 100vh; }
+#main-layout  { display: flex; flex: 1; overflow: hidden; }
+
+/* ---- Header ---- */
+#app-header {
+  display: flex; align-items: center; gap: 20px;
+  padding: 0 20px; height: 48px;
+  background: var(--sidebar-bg); color: #fff;
+}
+#app-header h1   { font-size: 16px; font-weight: 600; white-space: nowrap; }
+#standard-selector {
+  display: flex; align-items: center; gap: 8px;
+}
+#standard-select {
+  padding: 5px 10px; border-radius: var(--radius);
+  border: 1px solid var(--border); font-size: 13px;
+}
+#btn-add-standard {
+  background: var(--primary); color: #fff; border: none;
+  width: 26px; height: 26px; border-radius: 4px;
+  cursor: pointer; font-size: 18px;
+  display: flex; align-items: center; justify-content: center;
+}
+#btn-add-standard:hover { background: var(--primary-hover); }
+
+/* ---- Sidebar ---- */
+#sidebar {
+  width: 230px; min-width: 230px;
+  background: var(--sidebar-bg); color: var(--sidebar-text);
+  display: flex; flex-direction: column;
+  border-right: 1px solid rgba(255,255,255,.08);
+}
+#sidebar-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 14px; border-bottom: 1px solid rgba(255,255,255,.08);
+}
+#sidebar-header h2 {
+  font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .8px;
+}
+#sidebar-header button {
+  background: var(--primary); color: #fff; border: none;
+  width: 26px; height: 26px; border-radius: 4px;
+  cursor: pointer; font-size: 18px;
+  display: flex; align-items: center; justify-content: center;
+}
+#controls-list { flex: 1; overflow-y: auto; padding: 6px 0; }
+.control-item {
+  padding: 9px 14px; cursor: pointer;
+  border-left: 3px solid transparent; transition: all .12s;
+}
+.control-item:hover { background: rgba(255,255,255,.04); }
+.control-item.active {
+  background: rgba(79,107,237,.15);
+  border-left-color: var(--primary);
+}
+.control-item .clause-ref { font-size: 11px; color: var(--primary); font-weight: 700; }
+.control-item .clause-title { font-size: 12px; margin-top: 1px; color: var(--sidebar-text); }
+#sidebar-footer {
+  padding: 10px 14px;
+  border-top: 1px solid rgba(255,255,255,.08);
+}
+
+/* ---- Content area ---- */
+#content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+#no-selection {
+  display: flex; align-items: center; justify-content: center;
+  height: 100%; color: var(--text-light); font-size: 15px;
+}
+#control-view { display: none; flex-direction: column; flex: 1; overflow: hidden; }
+
+/* ---- Control header ---- */
+#control-header {
+  padding: 14px 22px; background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+#control-title-row { display: flex; align-items: center; gap: 10px; }
+#control-clause {
+  font-size: 13px; font-weight: 800; color: var(--primary); white-space: nowrap;
+}
+#control-title {
+  flex: 1; font-size: 17px; font-weight: 600;
+  border: none; background: transparent; padding: 3px 0;
+  outline: none; border-bottom: 2px solid transparent;
+}
+#control-title:focus { border-bottom-color: var(--primary); }
+#control-meta-row {
+  display: flex; align-items: center; gap: 14px;
+  margin-top: 8px; font-size: 12px;
+}
+#control-meta-row label  { display: flex; align-items: center; gap: 5px; }
+#control-meta-row select,
+#control-meta-row input  {
+  padding: 3px 7px; border: 1px solid var(--border);
+  border-radius: 4px; font-size: 12px;
+}
+
+/* ---- Layer navigator bar ---- */
+#layer-navigator { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+#layer-controls {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 22px; background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+#layer-controls button {
+  width: 34px; height: 34px;
+  border: 2px solid var(--border); background: #fff;
+  border-radius: 50%; cursor: pointer; font-size: 20px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .15s; color: var(--text);
+}
+#layer-controls button:hover { border-color: var(--primary); color: var(--primary); }
+#layer-dots { display: flex; gap: 8px; }
+.layer-dot {
+  width: 12px; height: 12px; border-radius: 50%;
+  background: var(--layer-inactive); cursor: pointer;
+  transition: all .2s;
+}
+.layer-dot.active { background: var(--layer-active); transform: scale(1.35); }
+.layer-dot:hover  { background: var(--primary); }
+#layer-label {
+  font-size: 14px; font-weight: 600; color: var(--primary); margin-left: 6px;
+}
+
+/* ---- Layer content (scrollable) ---- */
+#layer-content { flex: 1; overflow-y: auto; padding: 16px 22px; }
+
+.section {
+  margin-bottom: 16px; background: var(--surface);
+  border-radius: var(--radius); padding: 14px;
+  border: 1px solid var(--border);
+}
+.section h3 {
+  font-size: 11px; text-transform: uppercase;
+  letter-spacing: .6px; color: var(--text-light); margin-bottom: 8px;
+}
+.section textarea {
+  width: 100%; border: 1px solid var(--border);
+  border-radius: 4px; padding: 8px 10px;
+  font-size: 13px; font-family: inherit;
+  resize: vertical; min-height: 50px;
+}
+#layer-text-editor {
+  min-height: 90px; padding: 10px 12px;
+  border: 1px solid var(--border); border-radius: 4px;
+  font-size: 13px; line-height: 1.6; outline: none;
+}
+#layer-text-editor:focus { border-color: var(--primary); }
+.hint { font-size: 11px; color: var(--text-light); margin-bottom: 8px; }
+
+/* ---- Buttons ---- */
+.btn-primary {
+  background: var(--primary); color: #fff; border: none;
+  padding: 5px 14px; border-radius: 4px;
+  cursor: pointer; font-size: 12px; font-weight: 500;
+}
+.btn-primary:hover { background: var(--primary-hover); }
+.btn-danger {
+  background: transparent; color: var(--danger);
+  border: 1px solid var(--danger); padding: 5px 14px;
+  border-radius: 4px; cursor: pointer; font-size: 12px;
+}
+.btn-danger:hover { background: var(--danger); color: #fff; }
+.btn-small {
+  background: transparent; border: 1px solid var(--border);
+  padding: 5px 10px; border-radius: 4px;
+  cursor: pointer; font-size: 11px; color: var(--text);
+}
+.btn-small:hover { border-color: var(--primary); color: var(--primary); }
+.btn-file { display: inline-block; cursor: pointer; }
+.btn-file input[type="file"] { display: none; }
+
+/* ---- Attachments ---- */
+#attachment-actions { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+.attachment-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 0; border-bottom: 1px solid var(--border);
+  font-size: 12px;
+}
+.attachment-item:last-child { border-bottom: none; }
+.attachment-item .att-icon { font-size: 16px; }
+.attachment-item .att-name { flex: 1; }
+.attachment-item button {
+  background: none; border: none; cursor: pointer;
+  color: var(--primary); font-size: 11px; padding: 2px 5px;
+}
+.attachment-item button.att-delete { color: var(--danger); }
+
+/* ---- Mappings ---- */
+#mappings-list { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 6px; }
+.mapping-tag {
+  display: inline-flex; align-items: center; gap: 3px;
+  background: #e8edf5; padding: 3px 9px; border-radius: 10px; font-size: 11px;
+}
+.mapping-tag button {
+  background: none; border: none; cursor: pointer;
+  color: var(--danger); font-size: 13px; line-height: 1;
+}
+.inline-row { display: flex; gap: 6px; align-items: center; }
+#mapping-input {
+  padding: 5px 8px; border: 1px solid var(--border);
+  border-radius: 4px; font-size: 12px; width: 180px;
+}
+
+/* ---- draw.io container ---- */
+#drawio-container {
+  width: 100%; min-height: 350px;
+  border: 1px solid var(--border); border-radius: 4px;
+  overflow: hidden; background: #fff;
+}
+
+/* ---- Status bar ---- */
+#status-bar {
+  padding: 5px 22px; font-size: 11px;
+  color: var(--text-light); background: var(--surface);
+  border-top: 1px solid var(--border); min-height: 26px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+#status-bar.error { color: var(--danger); font-weight: 500; }
+#app-version { opacity: 0.6; font-size: 10px; white-space: nowrap; }
+</style>

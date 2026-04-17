@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <?!= include('Styles') ?>
+</head>
+<body>
+  <div id="app">
+
+    <!-- ===== Header ===== -->
+    <header id="app-header">
+      <h1>&#x1f6e1; Compliance Controls</h1>
+      <div id="standard-selector">
+        <select id="standard-select"><option value="">Loading…</option></select>
+        <button id="btn-add-standard" title="Add Standard">+</button>
+      </div>
+    </header>
+
+    <!-- ===== Main layout ===== -->
+    <div id="main-layout">
+
+      <!-- Sidebar -->
+      <aside id="sidebar">
+        <div id="sidebar-header">
+          <h2>Controls</h2>
+          <button id="btn-add-control" title="Add Control">+</button>
+        </div>
+        <div id="controls-list"></div>
+        <div id="sidebar-footer">
+          <button id="btn-init-sample" class="btn-small">Load Sample Data</button>
+        </div>
+      </aside>
+
+      <!-- Content area -->
+      <main id="content">
+
+        <!-- Empty state -->
+        <div id="no-selection">
+          <p>Select a control from the sidebar, or load sample data to get started.</p>
+        </div>
+
+        <!-- Control view (hidden until a control is selected) -->
+        <div id="control-view">
+
+          <!-- Document header fields -->
+          <div id="control-header">
+            <div id="control-title-row">
+              <span id="control-clause"></span>
+              <input id="control-title" placeholder="Control title" />
+            </div>
+            <div id="control-meta-row">
+              <label>Classification
+                <select id="control-classification">
+                  <option>Public</option>
+                  <option>Internal</option>
+                  <option>Confidential</option>
+                  <option>Restricted</option>
+                </select>
+              </label>
+              <label>Version <input id="control-version-input" size="6" /></label>
+              <button id="btn-save-control" class="btn-primary">Save</button>
+              <button id="btn-delete-control" class="btn-danger">Delete</button>
+            </div>
+          </div>
+
+          <!-- Layer navigator -->
+          <div id="layer-navigator">
+            <div id="layer-controls">
+              <button id="btn-zoom-out" title="Zoom out (higher abstraction)">&#8722;</button>
+              <div id="layer-dots"></div>
+              <button id="btn-zoom-in" title="Zoom in (more detail)">+</button>
+              <span id="layer-label"></span>
+            </div>
+
+            <!-- Scrollable layer content -->
+            <div id="layer-content">
+
+              <div id="source-section" class="section">
+                <h3>Source Requirement</h3>
+                <textarea id="source-text" rows="3" placeholder="Normative source text…"></textarea>
+              </div>
+
+              <div id="description-section" class="section">
+                <h3>Description</h3>
+                <textarea id="description-text" rows="3" placeholder="Control description…"></textarea>
+              </div>
+
+              <div id="mappings-section" class="section">
+                <h3>Related Requirements</h3>
+                <div id="mappings-list"></div>
+                <div class="inline-row">
+                  <input id="mapping-input" placeholder="e.g. iso27001-A.5.2" />
+                  <button id="btn-add-mapping" class="btn-small">Add</button>
+                </div>
+              </div>
+
+              <!-- Layer-specific rich text -->
+              <div id="layer-text-section" class="section">
+                <h3 id="layer-text-title">Content</h3>
+                <div id="layer-text-editor" contenteditable="true"></div>
+              </div>
+
+              <!-- draw.io diagram (shown when a .drawio file exists) -->
+              <div id="drawio-section" class="section" style="display:none;">
+                <h3>Process Diagram — <span id="drawio-page-label"></span></h3>
+                <p class="hint">The diagram page follows your current zoom layer.</p>
+                <div id="drawio-container"></div>
+              </div>
+
+              <!-- Attachments -->
+              <div id="attachments-section" class="section">
+                <h3>Attachments</h3>
+                <div id="attachments-list"></div>
+                <div id="attachment-actions">
+                  <label class="btn-small btn-file">
+                    Upload File
+                    <input type="file" id="file-upload" accept=".pdf,.drawio,.xml,.png,.jpg,.jpeg,.gif" />
+                  </label>
+                  <button id="btn-new-doc" class="btn-small">New Google Doc</button>
+                  <button id="btn-new-sheet" class="btn-small">New Google Sheet</button>
+                </div>
+              </div>
+
+            </div><!-- /layer-content -->
+          </div><!-- /layer-navigator -->
+        </div><!-- /control-view -->
+      </main>
+    </div><!-- /main-layout -->
+
+    <!-- Status bar -->
+    <div id="status-bar"><span id="status-text"></span><span id="app-version"></span></div>
+
+  </div><!-- /app -->
+
+  <?!= include('App') ?>
+</body>
+</html>
