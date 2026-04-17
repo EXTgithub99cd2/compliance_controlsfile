@@ -85,7 +85,6 @@
 
   function fileIcon(mime, name) {
     if (name && name.endsWith('.drawio')) return '\uD83D\uDCD0';
-    if (name && name.endsWith('.link.txt')) return '\uD83D\uDCC2';
     if (mime === 'application/vnd.google-apps.shortcut') return '\uD83D\uDD17';
     if (mime === 'application/pdf') return '\uD83D\uDCC4';
     if (mime === 'application/vnd.google-apps.document')    return '\uD83D\uDCDD';
@@ -499,10 +498,26 @@
   function renderAttachments() {
     var el = $('attachments-list');
     el.innerHTML = '';
-    if (!state.controlFiles.length) {
+    var links = (state.currentControl && state.currentControl.links) || [];
+    var hasItems = state.controlFiles.length || links.length;
+    if (!hasItems) {
       el.innerHTML = '<p style="color:var(--text-light);font-size:12px;">No files attached yet.</p>';
       return;
     }
+
+    // Render Drive links
+    links.forEach(function (lnk, i) {
+      var div = document.createElement('div');
+      div.className = 'attachment-item';
+      div.innerHTML =
+        '<span class="att-icon">\uD83D\uDD17</span>' +
+        '<span class="att-name">' + esc(lnk.name) + '</span>' +
+        '<button class="att-view att-link-open" data-idx="' + i + '">Open</button>' +
+        '<button class="att-delete att-link-remove" data-idx="' + i + '">Remove</button>';
+      el.appendChild(div);
+    });
+
+    // Render actual files
     state.controlFiles.forEach(function (f) {
       var div = document.createElement('div');
       div.className = 'attachment-item';
@@ -510,8 +525,6 @@
       var btn  = '';
       if (f.name && f.name.endsWith('.drawio')) {
         btn = '<button class="att-view" data-id="' + f.id + '" data-action="drawio">View in App</button>';
-      } else if (f.name && f.name.endsWith('.link.txt')) {
-        btn = '<button class="att-view" data-id="' + f.id + '" data-action="link" data-url="' + esc(f.url) + '">Open Folder</button>';
       } else if (f.mimeType === 'application/pdf') {
         btn = '<button class="att-view" data-id="' + f.id + '" data-action="pdf">View PDF</button>';
       } else if (f.mimeType === 'application/vnd.google-apps.document') {
@@ -529,17 +542,33 @@
       el.appendChild(div);
     });
 
-    // Attach event listeners (avoids inline onclick)
-    el.querySelectorAll('.att-view').forEach(function (b) {
+    // Link event listeners — open target URL directly
+    el.querySelectorAll('.att-link-open').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var idx = parseInt(this.getAttribute('data-idx'), 10);
+        var lnk = (state.currentControl.links || [])[idx];
+        if (lnk) window.open(lnk.url, '_blank');
+      });
+    });
+    el.querySelectorAll('.att-link-remove').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var idx = parseInt(this.getAttribute('data-idx'), 10);
+        if (!confirm('Remove this link?')) return;
+        state.currentControl.links.splice(idx, 1);
+        saveCurrentControl();
+      });
+    });
+
+    // File event listeners
+    el.querySelectorAll('.att-view:not(.att-link-open)').forEach(function (b) {
       b.addEventListener('click', function () {
         var fid    = this.getAttribute('data-id');
         var action = this.getAttribute('data-action');
         if (action === 'drawio') { viewDrawio(fid); }
-        else if (action === 'link') { window.open(this.getAttribute('data-url'), '_blank'); }
         else { viewInDrive(fid, action); }
       });
     });
-    el.querySelectorAll('.att-delete').forEach(function (b) {
+    el.querySelectorAll('.att-delete:not(.att-link-remove)').forEach(function (b) {
       b.addEventListener('click', function () {
         deleteAttachment(this.getAttribute('data-id'));
       });
@@ -605,14 +634,18 @@
   function linkDriveItem() {
     if (!state.currentControl) return;
     var url = prompt('Paste Google Drive link (file or folder URL):');
-    if (!url) return;
-    showStatus('Linking\u2026');
-    google.script.run
-      .withSuccessHandler(function () {
-        showStatus('Linked.'); loadControlFiles();
-      })
-      .withFailureHandler(function (e) { showError('Link failed: ' + e.message); })
-      .linkDriveItem(state.currentControl.id, url);
+    if (!url || !url.trim()) return;
+    url = url.trim();
+    var name = prompt('Display name for this link:', '');
+    if (name === null) return;
+    if (!name.trim()) {
+      // Extract a name from the URL
+      var m = url.match(/\/d\/|folders\//);
+      name = m ? 'Drive link' : url;
+    }
+    if (!state.currentControl.links) state.currentControl.links = [];
+    state.currentControl.links.push({ name: name.trim(), url: url });
+    saveCurrentControl();
   }
 
   // ==================================================================
