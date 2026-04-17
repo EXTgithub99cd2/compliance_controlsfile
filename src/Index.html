@@ -13,6 +13,8 @@
       <div id="standard-selector">
         <select id="standard-select"><option value="">Loading…</option></select>
         <button id="btn-add-standard" title="Add Standard">+</button>
+        <button id="btn-edit-standard" title="Edit Standard">✎</button>
+        <button id="btn-delete-standard" title="Delete Standard">−</button>
       </div>
     </header>
 
@@ -126,6 +128,19 @@
         </div><!-- /control-view -->
       </main>
     </div><!-- /main-layout -->
+
+    <!-- Standard editor modal -->
+    <div id="modal-overlay" style="display:none;">
+      <div id="modal">
+        <h3 id="modal-title">Edit Standard</h3>
+        <label>Name<input id="modal-std-name" /></label>
+        <label>Description<input id="modal-std-desc" /></label>
+        <div id="modal-buttons">
+          <button id="modal-save" class="btn-primary">Save</button>
+          <button id="modal-cancel">Cancel</button>
+        </div>
+      </div>
+    </div>
 
     <!-- Status bar -->
     <div id="status-bar"><span id="status-text"></span><span id="app-version"></span></div>

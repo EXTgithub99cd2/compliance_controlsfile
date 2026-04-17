@@ -74,6 +74,20 @@ function getStandards() {
 function getStandard(id)   { return readJson_(standardsFolder_(), id); }
 function saveStandard(data){ writeJson_(standardsFolder_(), data.id, data); return data; }
 
+function deleteStandard(standardId) {
+  const lock = LockService.getScriptLock();
+  lock.tryLock(10000);
+  try {
+    const std = getStandard(standardId);
+    if (!std) return;
+    // Delete all controls belonging to this standard
+    (std.clauses || []).forEach(function(cid) {
+      deleteJson_(controlsFolder_(), cid);
+    });
+    deleteJson_(standardsFolder_(), standardId);
+  } finally { lock.releaseLock(); }
+}
+
 // =====================================================================
 //  Controls
 // =====================================================================
